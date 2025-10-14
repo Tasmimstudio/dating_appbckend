@@ -10,7 +10,7 @@ router = APIRouter(prefix="/swipes", tags=["Swipes"])
 def create_swipe(swipe: SwipeCreate):
     """Create a swipe (like, dislike, super_like)"""
     # Check if user has already swiped on this person
-    already_swiped = crud.swipe.check_already_swiped(swipe.from_user_id, swipe.to_user_id)
+    already_swiped = crud.Swipe.check_already_swiped(swipe.from_user_id, swipe.to_user_id)
     if already_swiped:
         raise HTTPException(status_code=400, detail="You have already swiped on this user")
 
@@ -22,7 +22,7 @@ def create_swipe(swipe: SwipeCreate):
         raise HTTPException(status_code=404, detail="User not found")
 
     # Create swipe
-    result = crud.swipe.create_swipe(swipe.from_user_id, swipe.to_user_id, swipe.action)
+    result = crud.Swipe.create_swipe(swipe.from_user_id, swipe.to_user_id, swipe.action)
 
     return SwipeResponse(
         swipe_id=result["swipe"].swipe_id,
@@ -36,14 +36,14 @@ def create_swipe(swipe: SwipeCreate):
 @router.get("/user/{user_id}", response_model=List[dict])
 def get_user_swipes(user_id: str, action: str = None):
     """Get all swipes by a user, optionally filtered by action"""
-    swipes = crud.swipe.get_user_swipes(user_id, action)
+    swipes = crud.Swipe.get_user_swipes(user_id, action)
     return swipes
 
 @router.get("/likes/{user_id}", response_model=List[dict])
 def get_user_likes(user_id: str):
     """Get all users this user has liked"""
-    likes = crud.swipe.get_user_swipes(user_id, "like")
-    super_likes = crud.swipe.get_user_swipes(user_id, "super_like")
+    likes = crud.Swipe.get_user_swipes(user_id, "like")
+    super_likes = crud.Swipe.get_user_swipes(user_id, "super_like")
     return likes + super_likes
 
 @router.get("/received-likes/{user_id}")

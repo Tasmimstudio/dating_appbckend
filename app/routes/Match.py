@@ -8,7 +8,7 @@ router = APIRouter(prefix="/matches", tags=["Matches"])
 
 @router.get("/{match_id}", response_model=MatchResponse)
 def get_match(match_id: str):
-    match = crud.match.get_match_by_id(match_id)
+    match = crud.Match.get_match_by_id(match_id)
     if not match:
         raise HTTPException(status_code=404, detail="Match not found")
     return match.__dict__
@@ -17,14 +17,14 @@ def get_match(match_id: str):
 def get_user_matches(user_id: str):
     """Get all matches for a user"""
     print(f"Fetching matches for user: {user_id}")
-    matches = crud.match.get_user_matches(user_id)
+    matches = crud.Match.get_user_matches(user_id)
     print(f"Found {len(matches)} matches: {matches}")
     return matches
 
 @router.delete("/{match_id}")
 def delete_match(match_id: str):
     """Unmatch users"""
-    match = crud.match.get_match_by_id(match_id)
+    match = crud.Match.get_match_by_id(match_id)
     if not match:
         raise HTTPException(status_code=404, detail="Match not found")
 

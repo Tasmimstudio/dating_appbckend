@@ -17,7 +17,7 @@ def send_message(message: MessageCreate):
         raise HTTPException(status_code=404, detail="User not found")
 
     # Create message (match_id is optional)
-    new_message = crud.message.create_message(
+    new_message = crud.Message.create_message(
         message.sender_id,
         message.receiver_id,
         message.content,
@@ -28,7 +28,7 @@ def send_message(message: MessageCreate):
 
 @router.get("/{message_id}", response_model=MessageResponse)
 def get_message(message_id: str):
-    message = crud.message.get_message_by_id(message_id)
+    message = crud.Message.get_message_by_id(message_id)
     if not message:
         raise HTTPException(status_code=404, detail="Message not found")
     return message.__dict__
@@ -36,11 +36,11 @@ def get_message(message_id: str):
 @router.get("/match/{match_id}")
 def get_match_messages(match_id: str, limit: int = 50, offset: int = 0):
     """Get all messages in a match"""
-    match = crud.match.get_match_by_id(match_id)
+    match = crud.Match.get_match_by_id(match_id)
     if not match:
         raise HTTPException(status_code=404, detail="Match not found")
 
-    messages = crud.message.get_match_messages(match_id, limit, offset)
+    messages = crud.Message.get_match_messages(match_id, limit, offset)
 
     return {
         "match_id": match_id,
@@ -51,7 +51,7 @@ def get_match_messages(match_id: str, limit: int = 50, offset: int = 0):
 @router.patch("/{message_id}/read", response_model=MessageResponse)
 def mark_message_read(message_id: str):
     """Mark a message as read"""
-    message = crud.message.mark_message_as_read(message_id)
+    message = crud.Message.mark_message_as_read(message_id)
     if not message:
         raise HTTPException(status_code=404, detail="Message not found")
     return message.__dict__
@@ -59,14 +59,14 @@ def mark_message_read(message_id: str):
 @router.get("/unread/{user_id}")
 def get_unread_count(user_id: str):
     """Get count of unread messages for a user"""
-    count = crud.message.get_unread_message_count(user_id)
+    count = crud.Message.get_unread_message_count(user_id)
     return {"user_id": user_id, "unread_count": count}
 
 @router.get("/{user_id}/conversations")
 def get_user_conversations(user_id: str):
     """Get all conversations for a user (list of matches with last message)"""
     # Get all matches for the user
-    matches = crud.match.get_user_matches(user_id)
+    matches = crud.Match.get_user_matches(user_id)
 
     conversations = []
     for match in matches:
@@ -78,7 +78,7 @@ def get_user_conversations(user_id: str):
 
         # Get last message between these users
         try:
-            messages = crud.message.get_messages_between_users(user_id, other_user_id, limit=1)
+            messages = crud.Message.get_messages_between_users(user_id, other_user_id, limit=1)
             last_message = messages[0] if messages else None
         except:
             last_message = None
@@ -110,5 +110,5 @@ def get_user_conversations(user_id: str):
 @router.get("/{user_id1}/{user_id2}")
 def get_messages_between_users(user_id1: str, user_id2: str, limit: int = 50):
     """Get all messages between two users"""
-    messages = crud.message.get_messages_between_users(user_id1, user_id2, limit)
+    messages = crud.Message.get_messages_between_users(user_id1, user_id2, limit)
     return [msg.__dict__ for msg in messages]

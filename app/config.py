@@ -4,8 +4,8 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-# Load .env from parent directory
-env_path = Path(__file__).parent.parent.parent / '.env'
+# Load .env from project root directory
+env_path = Path(__file__).parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
 
 NEO4J_URI = os.getenv("NEO4J_URI")
