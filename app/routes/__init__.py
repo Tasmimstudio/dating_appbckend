@@ -8,4 +8,5 @@ from app.routes import Auth
 from app.routes import Admin
 from app.routes import Report
 from app.routes import Block
+from app.routes import WebSocket
 
