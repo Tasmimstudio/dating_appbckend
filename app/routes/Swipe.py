@@ -2,12 +2,13 @@
 from fastapi import APIRouter, HTTPException
 from app import crud
 from app.schemas.Swipe import SwipeCreate, SwipeResponse
+from app.websocket_manager import manager
 from typing import List
 
 router = APIRouter(prefix="/swipes", tags=["Swipes"])
 
 @router.post("/", response_model=SwipeResponse)
-def create_swipe(swipe: SwipeCreate):
+async def create_swipe(swipe: SwipeCreate):
     """Create a swipe (like, dislike, super_like)"""
     # Check if user has already swiped on this person
     already_swiped = crud.Swipe.check_already_swiped(swipe.from_user_id, swipe.to_user_id)
@@ -23,6 +24,29 @@ def create_swipe(swipe: SwipeCreate):
 
     # Create swipe
     result = crud.Swipe.create_swipe(swipe.from_user_id, swipe.to_user_id, swipe.action)
+
+    # If it's a match, send WebSocket notifications to both users
+    if result["is_match"]:
+        match_data = {
+            "type": "new_match",
+            "data": {
+                "match_id": result.get("match_id"),
+                "user_id": to_user.user_id,
+                "name": to_user.name,
+                "age": to_user.age,
+                "bio": to_user.bio
+            }
+        }
+
+        # Notify the user who just swiped
+        await manager.send_personal_message(match_data, swipe.from_user_id)
+
+        # Notify the other user
+        match_data["data"]["user_id"] = from_user.user_id
+        match_data["data"]["name"] = from_user.name
+        match_data["data"]["age"] = from_user.age
+        match_data["data"]["bio"] = from_user.bio
+        await manager.send_personal_message(match_data, swipe.to_user_id)
 
     return SwipeResponse(
         swipe_id=result["swipe"].swipe_id,

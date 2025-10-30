@@ -1,13 +1,15 @@
 # app/routes/message.py
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, BackgroundTasks
 from app import crud
 from app.schemas.Message import MessageCreate, MessageResponse, ConversationResponse
+from app.websocket_manager import manager
 from typing import List
+import asyncio
 
 router = APIRouter(prefix="/messages", tags=["Messages"])
 
 @router.post("/", response_model=MessageResponse)
-def send_message(message: MessageCreate):
+async def send_message(message: MessageCreate, background_tasks: BackgroundTasks):
     """Send a message between matched users"""
     # Verify both users exist
     sender = crud.user.get_user_by_id(message.sender_id)
@@ -22,6 +24,22 @@ def send_message(message: MessageCreate):
         message.receiver_id,
         message.content,
         message.match_id if hasattr(message, 'match_id') else None
+    )
+
+    # Send message via WebSocket to the receiver
+    await manager.send_personal_message(
+        {
+            "type": "new_message",
+            "data": {
+                "message_id": new_message.message_id,
+                "sender_id": new_message.sender_id,
+                "receiver_id": new_message.receiver_id,
+                "content": new_message.content,
+                "sent_at": new_message.sent_at,
+                "sender_name": sender.name
+            }
+        },
+        message.receiver_id
     )
 
     return new_message.__dict__
@@ -49,11 +67,24 @@ def get_match_messages(match_id: str, limit: int = 50, offset: int = 0):
     }
 
 @router.patch("/{message_id}/read", response_model=MessageResponse)
-def mark_message_read(message_id: str):
+async def mark_message_read(message_id: str):
     """Mark a message as read"""
     message = crud.Message.mark_message_as_read(message_id)
     if not message:
         raise HTTPException(status_code=404, detail="Message not found")
+
+    # Notify sender via WebSocket that message was read
+    await manager.send_personal_message(
+        {
+            "type": "message_read",
+            "data": {
+                "message_id": message.message_id,
+                "read_at": message.read_at
+            }
+        },
+        message.sender_id
+    )
+
     return message.__dict__
 
 @router.get("/unread/{user_id}")
@@ -120,9 +151,22 @@ def mark_conversation_read(user_id: str, other_user_id: str):
     return {"message": f"Marked {count} messages as read"}
 
 @router.post("/{message_id}/delivered")
-def mark_message_delivered(message_id: str):
+async def mark_message_delivered(message_id: str):
     """Mark a message as delivered"""
     message = crud.Message.mark_message_as_delivered(message_id)
     if not message:
         raise HTTPException(status_code=404, detail="Message not found")
+
+    # Notify sender via WebSocket that message was delivered
+    await manager.send_personal_message(
+        {
+            "type": "message_delivered",
+            "data": {
+                "message_id": message.message_id,
+                "delivered_at": message.delivered_at
+            }
+        },
+        message.sender_id
+    )
+
     return {"message": "Message marked as delivered"}
