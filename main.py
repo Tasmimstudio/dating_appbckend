@@ -5,7 +5,6 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.routes import User, Match, Swipe, Message, Photo, Auth, Admin, Report, Block
-from app.routes import WebSocket
 app = FastAPI(title="Dating App Backend 🚀")
 
 # ✅ Enable CORS globally - MUST be added before routes
@@ -36,7 +35,6 @@ app.add_middleware(
 
 # ✅ Routers
 app.include_router(Auth.router, prefix="/auth", tags=["Auth"])
-app.include_router(WebSocket.router)
 app.include_router(Admin.router)
 app.include_router(User.router)
 app.include_router(Match.router)
