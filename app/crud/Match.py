@@ -64,8 +64,17 @@ def get_user_matches(user_id: str):
     query = """
     MATCH (u:User {user_id: $user_id})-[m:MATCHES]-(other:User)
     OPTIONAL MATCH (other)<-[:BELONGS_TO]-(photo:Photo {is_primary: true})
-    RETURN m, other, photo.url as primary_photo
-    ORDER BY m.matched_at DESC
+    OPTIONAL MATCH (msg:Message)
+    WHERE (msg.sender_id = $user_id AND msg.receiver_id = other.user_id)
+       OR (msg.sender_id = other.user_id AND msg.receiver_id = $user_id)
+    WITH m, other, photo, msg
+    ORDER BY msg.sent_at DESC
+    WITH m, other, photo.url as primary_photo,
+         COLLECT(msg)[0] as lastMsg
+    RETURN m, other, primary_photo,
+           lastMsg.content as last_message,
+           lastMsg.sent_at as last_message_time
+    ORDER BY COALESCE(lastMsg.sent_at, m.matched_at) DESC
     """
     results = session.run(query, {"user_id": user_id})
 
@@ -89,7 +98,9 @@ def get_user_matches(user_id: str):
             },
             "matched_at": rel["matched_at"],
             "conversation_started": rel["conversation_started"],
-            "last_message_at": rel.get("last_message_at")
+            "last_message_at": rel.get("last_message_at"),
+            "last_message": record.get("last_message"),
+            "last_message_time": record.get("last_message_time")
         })
 
     return matches
