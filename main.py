@@ -8,22 +8,22 @@ app = FastAPI(title="Dating App Backend 🚀")
 
 # ---------------------- CORS Setup ----------------------
 origins = [
-    "https://dating-app-frontend-zeta.vercel.app",  # ✅ Vercel frontend
-    "https://dating-app-frontend-tasmimstudioofficials-projects.vercel.app",
-    "http://localhost:5173",                        # ✅ Local frontend
-    "http://127.0.0.1:5173",                        # ✅ Local IP frontend
+    "https://dating-app-frontend-zeta.vercel.app",                     # ✅ Vercel frontend
+    "https://dating-app-frontend-tasmimstudioofficials-projects.vercel.app",  # ✅ Vercel frontend alternative
+    "http://localhost:5173",                                           # ✅ Local frontend
+    "http://127.0.0.1:5173",                                           # ✅ Local IP frontend
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],  # allow all HTTP methods
-    allow_headers=["*"],  # allow all headers
+    allow_origins=origins,         # explicitly allow these origins
+    allow_credentials=True,        # allow cookies/auth headers
+    allow_methods=["*"],           # allow all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],           # allow all headers (Content-Type, Authorization, etc.)
 )
 
 # ---------------------- Routers ----------------------
-app.include_router(root.router)  # root route first
+app.include_router(root.router)       # root route first
 app.include_router(Auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(Admin.router)
 app.include_router(User.router)
