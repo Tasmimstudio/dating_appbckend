@@ -24,12 +24,31 @@ def send_message(message: MessageCreate):
             detail=f"Receiver not found with ID: {message.receiver_id}"
         )
 
-    # Create message (match_id is optional)
+    # Find match_id between the two users
+    match_id = message.match_id if hasattr(message, 'match_id') else None
+    if not match_id:
+        # Query to find the match between these two users
+        from app.config import get_db
+        session = get_db()
+        match_query = """
+        MATCH (u1:User {user_id: $user1_id})-[m:MATCHES]-(u2:User {user_id: $user2_id})
+        RETURN m.match_id as match_id
+        LIMIT 1
+        """
+        result = session.run(match_query, {
+            "user1_id": message.sender_id,
+            "user2_id": message.receiver_id
+        }).single()
+
+        if result:
+            match_id = result["match_id"]
+
+    # Create message with match_id
     new_message = crud.Message.create_message(
         message.sender_id,
         message.receiver_id,
         message.content,
-        message.match_id if hasattr(message, 'match_id') else None
+        match_id
     )
 
     return new_message.__dict__
