@@ -4,6 +4,7 @@ from fastapi.responses import FileResponse
 from app.crud import user as crud_user
 from app.crud import Photo as crud_photo_module
 from app.schemas.Photo import PhotoCreate, PhotoUpdate, PhotoResponse, UserPhotosResponse
+from app.utils import cloudinary_service
 from typing import List, Optional
 import os
 import uuid
@@ -38,19 +39,19 @@ async def upload_photo_file(
             detail=f"File type not allowed. Allowed types: {', '.join(allowed_extensions)}"
         )
 
-    # Generate unique filename
-    unique_filename = f"{uuid.uuid4()}{file_ext}"
-    file_path = UPLOAD_DIR / unique_filename
-
-    # Save file
+    # Upload to Cloudinary
     try:
-        with file_path.open("wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+        # Read file content
+        file_content = await file.read()
 
-    # Create photo record with relative URL
-    photo_url = f"/photos/files/{unique_filename}"
+        # Upload to Cloudinary
+        upload_result = cloudinary_service.upload_photo(file_content, user_id)
+        photo_url = upload_result["url"]
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to upload photo: {str(e)}")
+
+    # Create photo record with Cloudinary URL
     new_photo = crud_photo_module.create_photo(
         user_id,
         photo_url,
