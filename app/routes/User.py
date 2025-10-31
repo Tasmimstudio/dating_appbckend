@@ -15,6 +15,15 @@ def create_user(user: UserCreate):
     new_user = crud_user.create_user(user)
     return new_user.__dict__
 
+@router.get("/search/", response_model=List[UserResponse])
+def search_users(query: str, limit: int = 20):
+    """Search users by name or email"""
+    if not query or len(query) < 2:
+        raise HTTPException(status_code=400, detail="Query must be at least 2 characters")
+
+    users = crud_user.search_users(query, limit)
+    return [user.__dict__ for user in users]
+
 @router.get("/{user_id}", response_model=UserResponse)
 def get_user(user_id: str):
     user = crud_user.get_user_by_id(user_id)

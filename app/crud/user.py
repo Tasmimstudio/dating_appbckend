@@ -286,6 +286,51 @@ def get_potential_matches(user_id: str):
 
     return users
 
+def search_users(query: str, limit: int = 20):
+    """Search users by name or email"""
+    session = get_db()
+
+    # Case-insensitive search using CONTAINS and toLower
+    search_query = """
+    MATCH (u:User)
+    WHERE toLower(u.name) CONTAINS toLower($query)
+       OR toLower(u.email) CONTAINS toLower($query)
+    RETURN u
+    LIMIT $limit
+    """
+
+    result = session.run(search_query, {"query": query, "limit": limit})
+
+    users = []
+    for record in result:
+        node = record["u"]
+        user = User(
+            user_id=node["user_id"],
+            name=node["name"],
+            email=node["email"],
+            age=node["age"],
+            gender=node["gender"],
+            password_hash=node["password_hash"],
+            bio=node.get("bio"),
+            city=node.get("city"),
+            latitude=node.get("latitude"),
+            longitude=node.get("longitude"),
+            height=node.get("height"),
+            occupation=node.get("occupation"),
+            education=node.get("education"),
+            interests=node.get("interests", []),
+            is_verified=node.get("is_verified", False),
+            created_at=node.get("created_at"),
+            last_active=node.get("last_active"),
+            min_age=node.get("min_age"),
+            max_age=node.get("max_age"),
+            max_distance=node.get("max_distance"),
+            gender_preference=node.get("gender_preference", [])
+        )
+        users.append(user)
+
+    return users
+
 def create_user_with_password(user_data: dict):
     """Create user with already hashed password"""
     session = get_db()
