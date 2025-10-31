@@ -26,7 +26,7 @@ app.add_middleware(
         "http://127.0.0.1:5174",
         "http://127.0.0.1:5181",
         "http://127.0.0.1:5182",
-        "https://dating-app-frontend-zeta.vercel.app/",
+        "https://dating-app-frontend-zeta.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
