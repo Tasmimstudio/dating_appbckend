@@ -1,6 +1,7 @@
 # app/routes/user.py
 from fastapi import APIRouter, HTTPException
 from app.crud import user as crud_user
+from app.crud import Photo as crud_photo
 from app.schemas.User import UserCreate, UserResponse, UserUpdate
 from typing import List
 from pydantic import BaseModel
@@ -29,7 +30,16 @@ def get_user(user_id: str):
     user = crud_user.get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return user.__dict__
+
+    # Fetch user photos
+    photos = crud_photo.get_user_photos(user_id)
+    photos_list = [p.__dict__ for p in photos] if photos else []
+
+    # Add photos to user dict
+    user_dict = user.__dict__
+    user_dict['photos'] = photos_list
+
+    return user_dict
 
 @router.get("/{user_id}/potential-matches")
 def get_potential_matches(user_id: str):

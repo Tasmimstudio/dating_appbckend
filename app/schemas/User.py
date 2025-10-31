@@ -59,6 +59,7 @@ class UserResponse(BaseModel):
     is_verified: bool = False
     created_at: Optional[str] = None
     last_active: Optional[str] = None
+    photos: Optional[List[dict]] = None
 
 class UserProfile(BaseModel):
     """Public profile view for other users"""
