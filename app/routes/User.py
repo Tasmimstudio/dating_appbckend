@@ -3,8 +3,12 @@ from fastapi import APIRouter, HTTPException
 from app.crud import user as crud_user
 from app.schemas.User import UserCreate, UserResponse, UserUpdate
 from typing import List
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/users", tags=["Users"])
+
+class InterestsUpdate(BaseModel):
+    interests: List[str]
 
 @router.post("/", response_model=UserResponse)
 def create_user(user: UserCreate):
@@ -36,5 +40,17 @@ def update_user(user_id: str, user_update: UserUpdate):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    updated_user = crud_user.update_user(user_id, user_update)
+    return updated_user.__dict__
+
+@router.put("/{user_id}/interests", response_model=UserResponse)
+def update_user_interests(user_id: str, interests_data: InterestsUpdate):
+    """Update user interests"""
+    user = crud_user.get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Create UserUpdate with just interests
+    user_update = UserUpdate(interests=interests_data.interests)
     updated_user = crud_user.update_user(user_id, user_update)
     return updated_user.__dict__

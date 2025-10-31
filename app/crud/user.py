@@ -30,6 +30,7 @@ def create_user(user_data):
         height: $height,
         occupation: $occupation,
         education: $education,
+        interests: $interests,
         is_verified: $is_verified,
         created_at: $created_at,
         last_active: $last_active,
@@ -55,6 +56,7 @@ def create_user(user_data):
         "height": user_data.height,
         "occupation": user_data.occupation,
         "education": user_data.education,
+        "interests": user_data.interests or [],
         "is_verified": False,
         "created_at": datetime.utcnow().isoformat(),
         "last_active": datetime.utcnow().isoformat(),
@@ -81,6 +83,7 @@ def create_user(user_data):
         height=node.get("height"),
         occupation=node.get("occupation"),
         education=node.get("education"),
+        interests=node.get("interests", []),
         is_verified=node.get("is_verified", False),
         created_at=node.get("created_at"),
         last_active=node.get("last_active"),
@@ -112,6 +115,7 @@ def get_user_by_id(user_id: str):
         height=node.get("height"),
         occupation=node.get("occupation"),
         education=node.get("education"),
+        interests=node.get("interests", []),
         is_verified=node.get("is_verified", False),
         created_at=node.get("created_at"),
         last_active=node.get("last_active"),
@@ -152,6 +156,9 @@ def update_user(user_id: str, user_data):
     if user_data.education is not None:
         updates.append("u.education = $education")
         params["education"] = user_data.education
+    if user_data.interests is not None:
+        updates.append("u.interests = $interests")
+        params["interests"] = user_data.interests
     if user_data.preferences is not None:
         prefs = user_data.preferences.dict()
         updates.append("u.min_age = $min_age")
@@ -184,6 +191,7 @@ def update_user(user_id: str, user_data):
         height=node.get("height"),
         occupation=node.get("occupation"),
         education=node.get("education"),
+        interests=node.get("interests", []),
         is_verified=node.get("is_verified", False),
         created_at=node.get("created_at"),
         last_active=node.get("last_active"),
@@ -215,6 +223,7 @@ def get_user_by_email(email: str):
         height=node.get("height"),
         occupation=node.get("occupation"),
         education=node.get("education"),
+        interests=node.get("interests", []),
         is_verified=node.get("is_verified", False),
         created_at=node.get("created_at"),
         last_active=node.get("last_active"),
@@ -260,6 +269,7 @@ def get_potential_matches(user_id: str):
             "height": node.get("height"),
             "occupation": node.get("occupation"),
             "education": node.get("education"),
+            "interests": node.get("interests", []),
             "is_verified": node.get("is_verified", False),
             "created_at": node.get("created_at"),
             "last_active": node.get("last_active"),

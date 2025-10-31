@@ -28,6 +28,7 @@ class UserCreate(BaseModel):
     height: Optional[int] = None  # in cm
     occupation: Optional[str] = None
     education: Optional[str] = None
+    interests: Optional[List[str]] = None
     preferences: Optional[UserPreferences] = None
 
 class UserUpdate(BaseModel):
@@ -39,6 +40,7 @@ class UserUpdate(BaseModel):
     height: Optional[int] = None
     occupation: Optional[str] = None
     education: Optional[str] = None
+    interests: Optional[List[str]] = None
     preferences: Optional[UserPreferences] = None
 
 class UserResponse(BaseModel):
@@ -52,6 +54,7 @@ class UserResponse(BaseModel):
     height: Optional[int] = None
     occupation: Optional[str] = None
     education: Optional[str] = None
+    interests: Optional[List[str]] = None
     preferences: Optional[UserPreferences] = None
     is_verified: bool = False
     created_at: Optional[str] = None

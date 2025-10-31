@@ -19,6 +19,7 @@ class User:
         height: Optional[int] = None,
         occupation: Optional[str] = None,
         education: Optional[str] = None,
+        interests: Optional[List[str]] = None,
         is_verified: bool = False,
         created_at: Optional[str] = None,
         last_active: Optional[str] = None,
@@ -42,6 +43,7 @@ class User:
         self.height = height
         self.occupation = occupation
         self.education = education
+        self.interests = interests or []
         self.is_verified = is_verified
         self.created_at = created_at or datetime.utcnow().isoformat()
         self.last_active = last_active or datetime.utcnow().isoformat()
