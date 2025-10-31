@@ -38,7 +38,6 @@ app.include_router(Match.router)
 app.include_router(Swipe.router)
 app.include_router(Message.router)
 app.include_router(Photo.router)
-app.include_router(Report.router)
 app.include_router(Block.router)
 
 @app.get("/")
