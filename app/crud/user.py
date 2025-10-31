@@ -286,20 +286,31 @@ def get_potential_matches(user_id: str):
 
     return users
 
-def search_users(query: str, limit: int = 20):
+def search_users(query: str, limit: int = 20, current_user_id: str = None):
     """Search users by name or email"""
     session = get_db()
 
     # Case-insensitive search using CONTAINS and toLower
-    search_query = """
-    MATCH (u:User)
-    WHERE toLower(u.name) CONTAINS toLower($query)
-       OR toLower(u.email) CONTAINS toLower($query)
-    RETURN u
-    LIMIT $limit
-    """
-
-    result = session.run(search_query, {"query": query, "limit": limit})
+    # Exclude current user if provided
+    if current_user_id:
+        search_query = """
+        MATCH (u:User)
+        WHERE (toLower(u.name) CONTAINS toLower($query)
+           OR toLower(u.email) CONTAINS toLower($query))
+           AND u.user_id <> $current_user_id
+        RETURN u
+        LIMIT $limit
+        """
+        result = session.run(search_query, {"query": query, "limit": limit, "current_user_id": current_user_id})
+    else:
+        search_query = """
+        MATCH (u:User)
+        WHERE toLower(u.name) CONTAINS toLower($query)
+           OR toLower(u.email) CONTAINS toLower($query)
+        RETURN u
+        LIMIT $limit
+        """
+        result = session.run(search_query, {"query": query, "limit": limit})
 
     users = []
     for record in result:
