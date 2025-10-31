@@ -10,6 +10,7 @@ app = FastAPI(title="Dating App Backend 🚀")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "https://dating-app-frontend-tasmimstudioofficials-projects.vercel.app",  # Vercel production
         "http://localhost:5173",
         "http://localhost:5174",
         "http://localhost:5175",
