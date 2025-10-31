@@ -9,6 +9,7 @@ app = FastAPI(title="Dating App Backend 🚀")
 # ---------------------- CORS Setup ----------------------
 origins = [
     "https://dating-app-frontend-zeta.vercel.app",  # ✅ Vercel frontend
+    "https://dating-app-frontend-tasmimstudioofficials-projects.vercel.app"
     "http://localhost:5173",                        # ✅ Local frontend
     "http://127.0.0.1:5173",                        # ✅ Local IP frontend
 ]
