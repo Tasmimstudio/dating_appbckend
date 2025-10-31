@@ -2,7 +2,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app.routes import User, Match, Swipe, Message, Photo, Auth, Admin, Report, Block
+from app.routes import User, Match, Swipe, Message, Photo, Auth, Admin, Block
 
 app = FastAPI(title="Dating App Backend 🚀")
 
