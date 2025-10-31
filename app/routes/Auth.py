@@ -43,6 +43,7 @@ class ResetPasswordRequest(BaseModel):
 # ---------- Register ----------
 @router.post("/register", response_model=Token)
 def register(user: UserCreate):
+    print("Received payload:", user)  # <-- add this line for debugging
     """Register a new user and return access token"""
     try:
         existing_user = crud_user.get_user_by_email(user.email)
@@ -87,6 +88,7 @@ def register(user: UserCreate):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Registration failed: {str(e)}"
         )
+
 
 # ---------- Login ----------
 @router.post("/login", response_model=Token)
