@@ -63,7 +63,8 @@ def get_user_matches(user_id: str):
     session = get_db()
     query = """
     MATCH (u:User {user_id: $user_id})-[m:MATCHES]-(other:User)
-    RETURN m, other.user_id as other_user_id, other.name as other_user_name
+    OPTIONAL MATCH (other)<-[:BELONGS_TO]-(photo:Photo {is_primary: true})
+    RETURN m, other, photo.url as primary_photo
     ORDER BY m.matched_at DESC
     """
     results = session.run(query, {"user_id": user_id})
@@ -71,10 +72,21 @@ def get_user_matches(user_id: str):
     matches = []
     for record in results:
         rel = record["m"]
+        other_user = record["other"]
         matches.append({
             "match_id": rel["match_id"],
-            "other_user_id": record["other_user_id"],
-            "other_user_name": record["other_user_name"],
+            "other_user_id": other_user["user_id"],
+            "other_user_name": other_user["name"],
+            "other_user": {
+                "user_id": other_user["user_id"],
+                "name": other_user["name"],
+                "age": other_user.get("age"),
+                "gender": other_user.get("gender"),
+                "bio": other_user.get("bio"),
+                "city": other_user.get("city"),
+                "occupation": other_user.get("occupation"),
+                "primary_photo": record.get("primary_photo")
+            },
             "matched_at": rel["matched_at"],
             "conversation_started": rel["conversation_started"],
             "last_message_at": rel.get("last_message_at")
