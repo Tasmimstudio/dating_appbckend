@@ -11,10 +11,18 @@ def send_message(message: MessageCreate):
     """Send a message between matched users"""
     # Verify both users exist
     sender = crud.user.get_user_by_id(message.sender_id)
-    receiver = crud.user.get_user_by_id(message.receiver_id)
+    if not sender:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Sender not found with ID: {message.sender_id}"
+        )
 
-    if not sender or not receiver:
-        raise HTTPException(status_code=404, detail="User not found")
+    receiver = crud.user.get_user_by_id(message.receiver_id)
+    if not receiver:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Receiver not found with ID: {message.receiver_id}"
+        )
 
     # Create message (match_id is optional)
     new_message = crud.Message.create_message(
