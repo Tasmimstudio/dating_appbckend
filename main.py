@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
 # app/main.py
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from app.routes import User, Match, Swipe, Message, Photo, Auth, Admin, Block
+from app.routes import User, Match, Swipe, Message, Photo, Auth, Admin, Block, root  # import root router
 
 app = FastAPI(title="Dating App Backend 🚀")
 
@@ -31,8 +30,9 @@ app.include_router(Swipe.router)
 app.include_router(Message.router)
 app.include_router(Photo.router)
 app.include_router(Block.router)
+app.include_router(root.router)  # ✅ include root router
 
-# ---------------------- Root ----------------------
-@app.get("/")
-def root():
-    return {"message": "Dating API backend is running 🚀"}
+# Remove old root route from main.py
+# @app.get("/")
+# def root():
+#     return {"message": "Dating API backend is running 🚀"}
