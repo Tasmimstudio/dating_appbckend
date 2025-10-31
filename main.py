@@ -10,18 +10,16 @@ app = FastAPI(title="Dating App Backend 🚀")
 
 # ---------------------- CORS Setup ----------------------
 # Enable CORS globally - must be added before routes
-# Temporarily allow all origins to debug preflight issues
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[  # Replace "*" with your frontend URL in production
-        "*",  
+    allow_origins=[
         "https://dating-app-frontend-zeta.vercel.app",  # ✅ Vercel frontend
         "http://localhost:5173",                        # ✅ Local frontend
+        "http://127.0.0.1:5173",                        # ✅ Local IP frontend
     ],
     allow_credentials=True,
     allow_methods=["*"],  # allow all HTTP methods
     allow_headers=["*"],  # allow all headers
-    expose_headers=["*"],
 )
 
 # ---------------------- Routers ----------------------
